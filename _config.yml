@@ -8,3 +8,5 @@ include:
   - README.md
   - Specification.md
   - LICENSE
+
+theme: jekyll-theme-slate
