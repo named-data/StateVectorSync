@@ -19,7 +19,7 @@ Li, T., Kong, Z., Mastorakis, S., & Zhang, L. (2019). Distributed Dataset Synchr
 
 # Protocol Specification
 
-## Basic Protocol Design
+## 1. Basic Protocol Design
 
 ```
 Node A       Node B      Node C
