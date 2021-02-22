@@ -11,6 +11,12 @@ Currently, there are three implementations of SVS available:
 - TypeScript: [pulsejet/ndnts-svs](https://github.com/pulsejet/ndnts-svs)
 - Python: [justincpresley/ndn-python-svs](https://github.com/justincpresley/ndn-python-svs) (in progress)
 
+## Using State Vector Sync
+
+Examples for using SVS can be found in the `./examples` folder of the individual implementations. If you'd enjoyed using StateVectorSync, or used it for your research, we'd appreciate a citations on the following publication:
+
+Li, T., Kong, Z., Mastorakis, S., & Zhang, L. (2019). Distributed Dataset Synchronization in Disruptive Networks. 16th IEEE International Conference on Mobile Ad-Hoc and Smart Systems (IEEE MASS), November, 10. https://doi.org/10.1109/MASS.2019.00057
+
 # Protocol Specification
 
 ## Basic Protocol Design
@@ -165,3 +171,7 @@ Sync Group with 3 participants, node A, B, and C
 
 - [ChronoChat](https://github.com/named-data/chronochat): A C++ chat client featuring the C++ version of SVS for group communication
 - [SVChat](https://github.com/pulsejet/svchat): An Angular-based chat application featuring the TypeScript version of SVS for group communication.
+
+# License
+
+StateVectorSync is an open source project licensed under the LGPL version 2.1. See [LICENSE](./LICENSE) for more information.
