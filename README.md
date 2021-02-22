@@ -58,7 +58,7 @@ Interest Lifetime: 1s
 
 **Data Interest Format**: `/<node-prefix>/<group-prefix>/<seq-num>`
 
-_Choosing alternative Data Interest formats may be decided on application-level._
+Note: _Choosing alternative Data Interest formats may be decided on application-level._
 
 ## 3. State Vector TLV Specification
 
@@ -152,7 +152,6 @@ Sync Group with 3 participants, node A, B, and C
 
 - Sync Interests are signed using signed interest V3
   - The last name component of the Sync Interest is the signature
-
 - The application may choose to use either HMAC or asymmetric signatures
   - Exchange of symmetric key (HMAC) is beyond the scope of the sync protocol
   - All nodes must maintain the list of trusted publishers when using asymmetric signatures
@@ -163,3 +162,6 @@ Sync Group with 3 participants, node A, B, and C
 # API Description
 
 # Example Applications
+
+- [ChronoChat](https://github.com/named-data/chronochat): A C++ chat client featuring the C++ version of SVS for group communication
+- [SVChat](https://github.com/pulsejet/svchat): An Angular-based chat application featuring the TypeScript version of SVS for group communication.
