@@ -7,9 +7,9 @@ In SVS, the data set state is synchronized using a state vector. Every participa
 
 Currently, there are three implementations of SVS available:
 
-- C++: [named-data/ndn-svs](https://github.com/named-data/ndn-svs)
-- TypeScript: [pulsejet/ndnts-svs](https://github.com/pulsejet/ndnts-svs)
-- Python: [justincpresley/ndn-python-svs](https://github.com/justincpresley/ndn-python-svs) (in progress)
+- **C++**: [named-data/ndn-svs](https://github.com/named-data/ndn-svs)
+- **TypeScript**: [pulsejet/ndnts-svs](https://github.com/pulsejet/ndnts-svs)
+- **Python**: [justincpresley/ndn-python-svs](https://github.com/justincpresley/ndn-python-svs) (in progress)
 
 ## Using State Vector Sync
 

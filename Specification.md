@@ -1,5 +1,9 @@
 # StateVectorSync Protocol Specification
 
+This page describes the protocol specification of [StateVectorSync](README.md).
+
+**Last update to specification**: 2021-02-23
+
 ## 1. Basic Protocol Design
 
 ```
