@@ -18,15 +18,19 @@ On updating the version vector with `updateSeqNo`, the changes are propagated to
 
 ## Socket API
 
-`Socket` provides an interface for data exchange over `Logic`.
+`Socket` provides an interface for data exchange over `Logic`. The `Socket` API is described below:
 
-A base class `SocketBase` is provided, that must be extended to create `Socket` classes. Two implementations are provided, `Socket` and `SharedSocket`. `Socket` uses the data prefix of a node as the `NodeID` in the version vector, while `SocketShared` uses a sub-namespace inside the sync prefix for data exchange.
+* `Socket(Face, Name syncPrefix, Name nodePrefix, UpdateCallback, SecurityOptions)` - constructor.
+* `Socket::publishData(Buffer)` - publish the buffer as signed data on the next sequence number.
+* `Socket::fetchData(Name nodePrefix, SeqNo, Callback)` - fetch the data for a given node and sequence number.
+* `Socket::getLogic()` - get the underlying `Logic`.
 
-* `SocketBase(Face, Name syncPrefix, Name dataPrefix, NodeID, UpdateCallback, SecurityOptions)` - constructor.
-* `SocketBase::publishData(Buffer, SeqNo, NodeID)` - publish the buffer as signed data on the given `NodeID` and sequence number.
-* `SocketBase::fetchData(NodeID, SeqNo, Callback)` - fetch the data for a given node and sequence number.
-* `SocketBase::getDataName(NodeID, SeqNo)` - derived classes must override this method to return the name of the data packet corresponding to the given `NodeID` and sequence number. This allows usage of arbitrary data semantics.
-* `SocketBase::getLogic()` - get the underlying `Logic`.
+## SocketBase API (advanced usage)
+
+A base class `SocketBase` is provided, that may be extended by applications to create derived `Socket` classes, with arbitrary data semantics.
+
+Derived classes must define:
+* `SocketBase::getDataName(NodeID, SeqNo)` - return the name of the data packet corresponding to the given `NodeID` and sequence number `SeqNo`.
 
 # License
 StateVectorSync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](./LICENSE) for more information.
