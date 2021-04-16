@@ -141,8 +141,7 @@ Sync Group with 3 participants, node A, B, and C
 
 ## 7 Interest Authentication
 
-- Sync Interests are signed using signed interest V3
-  - The last name component of the Sync Interest is the signature
+- Sync Interests are signed using [signed interest V3](https://named-data.net/doc/NDN-packet-spec/0.3/signed-interest.html)
 - The application may choose to use either HMAC or asymmetric signatures
   - Exchange of symmetric key (HMAC) is beyond the scope of the sync protocol
   - All nodes must maintain the list of trusted publishers when using asymmetric signatures
