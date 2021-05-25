@@ -1,7 +1,7 @@
 # StateVectorSync
 Spec and API description of the StateVectorSync (SVS) protocol
 
-StateVectorSync (SVS) is an NDN transport layer protocol that allows efficient multi-producer/multi-consumer communication. The communication participants maintain a shared data set and whenever a participant publishes data to the data set, the other participants are informed about the data generation and can choose to retrieve the published data.
+[StateVectorSync (SVS)](https://named-data.net/wp-content/uploads/2021/05/ndn-0073-r1-SVS.pdf) is an NDN transport layer protocol that allows efficient multi-producer/multi-consumer communication. The communication participants maintain a shared data set and whenever a participant publishes data to the data set, the other participants are informed about the data generation and can choose to retrieve the published data.
 
 In SVS, the data set state is synchronized using a state vector. Every participant publishes Data under its own producer prefix, and to distinguish subsequent publications, the publications are enumerated using a sequence number. The highest sequence numbers of every participant are exchanged among all communicating participants in a state vector. Whenever receiving a state vector, new publications from other participants can be inferred and retrieved using Interest-Data exchange. The process of data set synchronization is elaborated in more detail in the Protocol Specification below.
 
@@ -15,15 +15,15 @@ Currently, there are three implementations of SVS available:
 
 Examples for using SVS can be found in the `./examples` folder of the individual implementations. If you'd enjoyed using StateVectorSync, or used it for your research, we'd appreciate a citations on the following publication:
 
-Li, T., Kong, Z., Mastorakis, S., & Zhang, L. (2019). Distributed Dataset Synchronization in Disruptive Networks. 16th IEEE International Conference on Mobile Ad-Hoc and Smart Systems (IEEE MASS), November, 10. https://doi.org/10.1109/MASS.2019.00057
+Philipp Moll, Varun Patil, Nishant Sabharwal, Lixia Zhang, “A Brief Introduction to State Vector Sync”, NDN Technical Report, NDN-0073, Revision 1, May, 2021 [https://named-data.net/publications/techreports/ndn-0073-r1-SVS/](https://named-data.net/publications/techreports/ndn-0073-r1-SVS/)
 
 # Protocol Specification
 
-For the detailed protocol specification, please see the [Specification.md](./Specification.md).
+For the detailed protocol specification, please see the [Specification](./Specification.md).
 
 # API Description
 
-The API is unified across the official libraries. Please find a detailed API description in [API.md](./API.md).
+The API is unified across the official libraries. Please find a detailed API description in [API](./API.md).
 
 # Example Applications
 
