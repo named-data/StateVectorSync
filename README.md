@@ -15,7 +15,7 @@ Currently, there are three implementations of SVS available:
 
 Examples for using SVS can be found in the `./examples` folder of the individual implementations. If you'd enjoyed using StateVectorSync, or used it for your research, we'd appreciate a citations on the following publication:
 
-Philipp Moll, Varun Patil, Nishant Sabharwal, Lixia Zhang, “A Brief Introduction to State Vector Sync”, NDN Technical Report, NDN-0073, Revision 1, May, 2021 [https://named-data.net/publications/techreports/ndn-0073-r1-SVS/](https://named-data.net/publications/techreports/ndn-0073-r1-SVS/)
+Philipp Moll, Varun Patil, Nishant Sabharwal, Lixia Zhang, “A Brief Introduction to State Vector Sync”, NDN Technical Report, NDN-0073, Revision 2, July, 2021 [https://named-data.net/wp-content/uploads/2021/07/ndn-0073-r2-SVS.pdf](https://named-data.net/wp-content/uploads/2021/07/ndn-0073-r2-SVS.pdf)
 
 # Protocol Specification
 

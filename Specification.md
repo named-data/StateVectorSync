@@ -41,7 +41,7 @@ seq=11                                  \
 
 ## 2. Format and Naming
 
-**Sync Interest Format**: `/<group-prefix>/<version-vector>/<signature>`
+**Sync Interest Format**: `/<group-prefix>/<state-vector>/<signature>`
 
 A state vector is appended to the name in TLV format:
 
@@ -55,17 +55,21 @@ Note: _Choosing alternative Data Interest formats may be decided on application-
 
 ```
 StateVector = VERSION-VECTOR-TYPE TLV-LENGTH
-              *StateVectorComponent
+              *StateVectorEntry
 
-StateVectorComponent = NodeID SeqNo
-NodeID = VERSION-VECTOR-KEY-TYPE TLV-LENGTH *OCTET
-SeqNo = VERSION-VECTOR-VALUE-TYPE TLV-LENGTH NonNegativeInteger
+StateVectorEntry = VERSION-VECTOR-ENTRY-TYPE TLV-LENGTH
+                   NodeID SeqNo
+
+NodeID = Name
+SeqNo = SEQ-NO-TYPE TLV-LENGTH NonNegativeInteger
+
 VERSION-VECTOR-TYPE = 201
-VERSION-VECTOR-KEY-TYPE = 202
-VERSION-VECTOR-VALUE-TYPE = 203
+VERSION-VECTOR-ENTRY-TYPE = 202
+SEQ-NO-TYPE = 204
 ```
 
-- The encoded version vector in the interest consists of the NodeID of each node followed by its latest sequence number
+- The encoded version vector in the interest consists of State Vector Entries
+- Each entry is a tuple of the NodeID of each node followed by its latest sequence number
 - Node names in the encoded version vector are ordered lexicographically to allow for interest aggregation.
 - Definition: _A State Vector A is outdated to State Vector B, if A contains any entry with seq number strictly smaller than in B._
 
@@ -81,6 +85,7 @@ VERSION-VECTOR-VALUE-TYPE = 203
 - When the node generates a new publication, immediately emit a Sync Interest, reset the Sync Interest Timer.
 
 ### 4.3 Sync Ack Policy - Do not acknowledge Sync Interests
+
 - Reason: Sending Sync Acks from multiple nodes result in unsolicited data. (the first one is delivered only, others are dropped)
 
 ### 4.4 Handling incoming Sync Interests
@@ -142,11 +147,9 @@ Sync Group with 3 participants, node A, B, and C
 ## 7 Interest Authentication
 
 - Sync Interests are signed using [signed interest V3](https://named-data.net/doc/NDN-packet-spec/0.3/signed-interest.html)
-- The application may choose to use either HMAC or asymmetric signatures
-  - Exchange of symmetric key (HMAC) is beyond the scope of the sync protocol
-  - All nodes must maintain the list of trusted publishers when using asymmetric signatures
-    - This mechanism is beyond the scope of the sync protocol
-  - Note: Interest aggregation cannot function when using asymmetric signatures
+- All nodes must maintain the list of trusted publishers when using asymmetric signatures
+  - This mechanism is beyond the scope of the Sync protocol
+- Note: Interest aggregation cannot function when using asymmetric signatures
 
 # License
 StateVectorSync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](./LICENSE) for more information.
