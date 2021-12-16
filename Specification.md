@@ -2,7 +2,7 @@
 
 This page describes the protocol specification of [StateVectorSync](README.md).
 
-**Last update to specification**: 2021-12-09
+**Last update to specification**: 2021-12-15
 
 ## 1. Basic Protocol Design
 
@@ -54,23 +54,23 @@ Note: _Choosing alternative Data Interest formats may be decided on application-
 ## 3. State Vector TLV Specification
 
 ```
-StateVector = VERSION-VECTOR-TYPE TLV-LENGTH
+StateVector = STATE-VECTOR-TYPE TLV-LENGTH
               *StateVectorEntry
 
-StateVectorEntry = VERSION-VECTOR-ENTRY-TYPE TLV-LENGTH
+StateVectorEntry = STATE-VECTOR-ENTRY-TYPE TLV-LENGTH
                    NodeID SeqNo
 
 NodeID = Name
 SeqNo = SEQ-NO-TYPE TLV-LENGTH NonNegativeInteger
 
-VERSION-VECTOR-TYPE = 201
-VERSION-VECTOR-ENTRY-TYPE = 202
+STATE-VECTOR-TYPE = 201
+STATE-VECTOR-ENTRY-TYPE = 202
 SEQ-NO-TYPE = 204
 ```
 
-- The encoded version vector in the interest consists of State Vector Entries
+- The encoded state vector in the Interest consists of State Vector Entries
 - Each entry is a tuple of the NodeID of each node followed by its latest sequence number
-- Node names in the encoded version vector are ordered lexicographically to allow for interest aggregation.
+- Node names in the encoded version vector are ordered in [NDN canonical order](https://named-data.net/doc/NDN-packet-spec/0.3/name.html#canonical-order) to allow for Interest aggregation.
 - Definition: _A State Vector A is outdated to State Vector B, if A contains any entry with seq number strictly smaller than in B._
 
 ## 4. State Sync
