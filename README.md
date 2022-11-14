@@ -19,7 +19,7 @@ Philipp Moll, Varun Patil, Nishant Sabharwal, Lixia Zhang, “A Brief Introducti
 
 # Protocol Specification
 
-For the detailed protocol specification, please see the [Specification](./Specification.md).
+For the detailed protocol specification, please see the [Specification](./Specification.md). For the specification of the SVS-PS Pub/Sub protocol, see the [PubSub Specification](./PubSubSpec.md).
 
 # API Description
 
