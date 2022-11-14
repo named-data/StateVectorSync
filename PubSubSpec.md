@@ -5,6 +5,7 @@ This page describes the specification of the SVS-PS protocol. SVS-PS runs on top
 ## Overview
 
 For each call, SVS-PS performs the functions in the order below:
+
 1. `publish`
     1. Segment, sign and encapsulate the data
     1. Provide the name mapping
@@ -26,6 +27,7 @@ Data blobs received from the `publish` call MUST be segmented if larger than the
 If the data blob is small enough to fit directly in the network MTU, then segmentation SHOULD NOT be done. If no segmentation is done, the Data packet MUST NOT contain a `FinalBlockId` field.
 
 Each segment MUST be encapsulated inside an "outer" Data packet, named following SVS Data naming convention. The SVS sequence number is the next available sequence number for the publisher. The `FinalBlockId` field of the outer Data packet MUST be set to the name of the last segment.
+
 ```
 /<node-prefix>/<sync-prefix>/<seq-num>/v=0/seg=<seg>
 ```
@@ -42,21 +44,22 @@ First Segment (outer): /node/a/some/group/25/v=0/seg=0
 
 The publisher MUST maintain a name mapping table for each NodeID it publishes to. The table MUST be updated on each publish call, to contain the tuple of the application Name of the data and the SVS sequence number.
 
-
 Each SVS-PS instance MUST respond to Interests for mapping data for each NodeID it publishes at. The name of the `query` Interest is defined as follows:
+
 ```
 /<node-prefix>/<sync-prefix>/MAPPING/<low-seq>/<high-seq>
 ```
 
 On receiving a matching Interest, the SVS-PS instance MUST respond with a Data packet containing the appropriate subset of the SeqNo-Name tuples for the node matching the `<node-prefix>`, from `low-seq` to `high-seq` both inclusive. The content of the data packet MUST be encoded as a TLV block of type `MappingData` as defined below.
 
-```
+```abnf
 StateVector = MAPPING-DATA-TYPE TLV-LENGTH
               NodeID
               *MappingEntry
 
 MappingEntry = MAPPING-ENTRY-TYPE TLV-LENGTH
-               SeqNo ApplicationName
+               SeqNo
+               ApplicationName
 
 NodeID = Name
 ApplicationName = Name
@@ -77,12 +80,14 @@ On receiving a `subscribe` call, the topic prefix and callback MUST be added to 
 ### Data Fetching
 
 On receiving a new sequence number, the application name mapping for the sequence number MUST be fetched if ALL of the following are satisfied:
+
 1. There is at least one entry in the `Subscriptions` table
 1. The producer does not match any entry in the `ProducerSubscriptions` table
 
 The name of the query Interest is defined in the publishers section.
 
 The data segments MUST be fetched if ANY of following are satisfied:
+
 1. There is at least one entry in the `Subscriptions` table that matches the application data name in the mapping (after the mapping is received).
 1. The producer matches an entry in the `ProducerSubscriptions` table
 
