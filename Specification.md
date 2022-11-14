@@ -45,20 +45,21 @@ seq=11                                  \
 
 A state vector is appended to the name in TLV format:
 
-Interest Lifetime: 1s
+Interest Lifetime: 1 second
 
 **Data Interest Format**: `/<node-prefix>/<group-prefix>/<seq-num>`
 
-Note: _Choosing alternative Data Interest formats may be decided on application-level._
+_Note:_ Choosing alternative Data Interest formats may be decided on application-level.
 
 ## 3. State Vector TLV Specification
 
-```
+```abnf
 StateVector = STATE-VECTOR-TYPE TLV-LENGTH
               *StateVectorEntry
 
 StateVectorEntry = STATE-VECTOR-ENTRY-TYPE TLV-LENGTH
-                   NodeID SeqNo
+                   NodeID
+                   SeqNo
 
 NodeID = Name
 SeqNo = SEQ-NO-TYPE TLV-LENGTH NonNegativeInteger
@@ -96,6 +97,7 @@ Nodes can either be in _Steady State_, or in _Suppression State_
 - _Suppression State_: Incoming Sync Interests indicate a state inconsistency. The node tries reconciling the inconsistency by emitting a up-to-date Sync Interest. Use a suppression timer before sending to prevent flooding.
 
 When a node is in _Steady State_:
+
 - Incoming Sync Interest is up-to-date or newer.
   - No indication of inconsistencies. The scheduled Sync Interest can be delayed.
   - Eventually update the local state and reset Sync Interest Timer to 30 seconds (±10% uniform)
@@ -110,13 +112,15 @@ When a node is in _Steady State_:
       Node moves to _Steady State_
 
 When a node is in _Supression State_:
+
 - Only aggregate state vector of incoming Sync Interests. No further action in _Suppression State_.
 
 ## 5 Examples
 
 ### 5.1 State Sync - Example without loss
 
-Sync Group with 3 participants, node A, B, and C
+Sync Group with 3 participants, node A, B, and C.
+
 - Data set state: [A=10, B=15, C=25], all nodes are in Sync
 - Node A publishes new publication.
 - A sends Sync Interests with [A=11, B=15, C=25]
@@ -125,7 +129,7 @@ Sync Group with 3 participants, node A, B, and C
 
 ### 5.2 State Sync - Example **with** packet loss
 
-Sync Group with 3 participants, node A, B, and C
+Sync Group with 3 participants, node A, B, and C.
 
 - Data set state: [A=10, B=15, C=25], all nodes are in Sync
 - Node A publishes new publication.
@@ -146,13 +150,14 @@ Sync Group with 3 participants, node A, B, and C
 
 ## 7 Interest Authentication
 
-- Sync Interests are signed using [signed interest V3](https://named-data.net/doc/NDN-packet-spec/0.3/signed-interest.html)
+- Sync Interests are signed using the [Signed Interest v0.3](https://named-data.net/doc/NDN-packet-spec/0.3/signed-interest.html) format
 - All nodes must maintain the list of trusted publishers when using asymmetric signatures
   - This mechanism is beyond the scope of the Sync protocol
-- Note: Interest aggregation cannot function when using asymmetric signatures
+- _Note:_ Interest aggregation cannot function when using asymmetric signatures
 
-# License
-State Vector Sync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](./LICENSE) for more information.
+## License
+
+State Vector Sync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](LICENSE) for more information.
 
 ![CC-BY-SA](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg)
 
