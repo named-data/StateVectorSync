@@ -1,6 +1,6 @@
-# StateVectorSync Protocol Specification
+# State Vector Sync Protocol Specification
 
-This page describes the protocol specification of [StateVectorSync](README.md).
+This page describes the protocol specification of [State Vector Sync](README.md).
 
 **Last update to specification**: 2021-12-15
 
@@ -152,7 +152,7 @@ Sync Group with 3 participants, node A, B, and C
 - Note: Interest aggregation cannot function when using asymmetric signatures
 
 # License
-StateVectorSync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](./LICENSE) for more information.
+State Vector Sync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](./LICENSE) for more information.
 
 ![CC-BY-SA](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg)
 
