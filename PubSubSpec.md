@@ -53,7 +53,7 @@ Each SVS-PS instance MUST respond to Interests for mapping data for each NodeID 
 On receiving a matching Interest, the SVS-PS instance MUST respond with a Data packet containing the appropriate subset of the SeqNo-Name tuples for the node matching the `<node-prefix>`, from `low-seq` to `high-seq` both inclusive. The content of the data packet MUST be encoded as a TLV block of type `MappingData` as defined below.
 
 ```abnf
-StateVector = MAPPING-DATA-TYPE TLV-LENGTH
+MappingData = MAPPING-DATA-TYPE TLV-LENGTH
               NodeID
               *MappingEntry
 
@@ -67,6 +67,7 @@ SeqNo = SEQ-NO-TYPE TLV-LENGTH NonNegativeInteger
 
 MAPPING-DATA-TYPE = 205
 MAPPING-ENTRY-TYPE = 206
+SEQ-NO-TYPE = 204
 ```
 
 ## Subscribers
