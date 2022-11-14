@@ -1,8 +1,9 @@
-# StateVectorSync API Description
+# State Vector Sync API Description
 
-This page describes the API of [StateVectorSync (SVS)](README.md). While there are implementations of SVS for multiple programming languages available, the basic API is the same across all official implementations.
+This page describes the API of [State Vector Sync (SVS)](README.md). While there are implementations of SVS for multiple programming languages available, the basic API is the same across all official implementations.
 
 The three components of an SVS library are:
+
 * `SVSPubSub` - a high level pub/sub API built over `SVSync`.
 * `SVSync` - provides an interface built on `SVSyncCore` to provide data delivery and synchronization.
 * `SVSyncCore` - purely contains state vector sync logic, which can be used for synchronizing version vectors across nodes.
@@ -43,10 +44,12 @@ On updating the version vector with `updateSeqNo`, the changes are propagated to
 A base class `SVSyncBase` is provided, that may be extended by applications to create derived `SVSync` classes, with arbitrary data semantics.
 
 Derived classes must define:
+
 * `SVSyncBase::getDataName(NodeID, SeqNo)` - return the name of the data packet corresponding to the given `NodeID` and sequence number `SeqNo`.
 
-# License
-StateVectorSync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](./LICENSE) for more information.
+## License
+
+State Vector Sync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](LICENSE) for more information.
 
 ![CC-BY-SA](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg)
 
