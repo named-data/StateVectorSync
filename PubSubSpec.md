@@ -2,6 +2,8 @@
 
 This page describes the specification of the SVS-PS protocol. SVS-PS runs on top of State Vector Sync and performs the additional functions described here.
 
+**Last update to specification**: 2022-12-27
+
 ## Overview
 
 For each call, SVS-PS performs the functions in the order below:
@@ -22,23 +24,35 @@ This section describes the functions performed at data publishers.
 
 ### Segmentation and Encapsulation
 
-Data blobs received from the `publish` call MUST be segmented if larger than the network MTU. Each segment is named per the NDN segmentation guidelines, with version number of `0`. Each segment MUST contain the `FinalBlockId` field set to the name of the last segment. Segmentation MAY be done asynchronously.
+Data blobs passed to the `publish` call MUST be segmented if it is larger than the network MTU. It SHOULD NOT be segmented if it is small enough to fit directly in the network MTU.
 
-If the data blob is small enough to fit directly in the network MTU, then segmentation SHOULD NOT be done. If no segmentation is done, the Data packet MUST NOT contain a `FinalBlockId` field.
+If segmentation is needed, each segment is named per the NDN segmentation guidelines, with version number of `0`. Each segment MUST contain the `FinalBlockId` field set to the name of the last segment. Segmentation MAY be done asynchronously.
 
-Each segment MUST be encapsulated inside an "outer" Data packet, named following SVS Data naming convention. The SVS sequence number is the next available sequence number for the publisher. The `FinalBlockId` field of the outer Data packet MUST be set to the name of the last segment.
+Each segment MUST be encapsulated inside an "outer" Data packet, named following SVS Data naming convention. The SVS sequence number is the next available sequence number for the publisher. The `ContentType` field of the outer Data packet MUST be set to `6` (i.e. TLV-TYPE number of `Data`). The `FreshnessPeriod` field of the outer Data packet MUST be set to a non-zero value. The `FinalBlockId` field of the outer Data packet MUST be set to the name of the last segment.
 
+```text
+Segment (encapsulated): /<app-name>/v=0/seg=<seg>
+Segment (outer): /<node-prefix>/<sync-prefix>/<seq-num>/v=0/seg=<seg>
+
+Examples:
+Application Data Name: /ndn/data/example
+First Segment (encapsulated): /ndn/data/example/v=0/seg=0
+First Segment (outer): /node/a/some/group/%19/v=0/seg=0
 ```
-/<node-prefix>/<sync-prefix>/<seq-num>/v=0/seg=<seg>
+
+If no segmentation is done, the Data packet MUST NOT contain a `FinalBlockId` field. The Data packet MUST, likewise, be encapsulated inside an "outer" Data packet. The name of outer Data packet MUST NOT contain version and segment components. The outer Data packet MUST NOT contain a `FinalBlockId` field.
+
+```text
+Unsegmented (encapsulated): /<app-name>
+Unsegmented (outer): /<node-prefix>/<sync-prefix>/<seq-num>
+
+Examples:
+Application Data Name: /ndn/data/example
+Unsegmented (encapsulated): /ndn/data/example
+Unsegmented (outer): /node/a/some/group/%19
 ```
 
 On completion of segmentation (or immediately if no segmentation or asynchronous segmentation), the Name Mapping MUST be updated and the SVS sequence number MUST be incremented to the next available sequence number to indicate the data is published.
-
-```
-Application Data Name: /ndn/data/example
-First Segment (encapsulated): /ndn/data/example/v=0/seg=0
-First Segment (outer): /node/a/some/group/25/v=0/seg=0
-```
 
 ### Name Mapping
 
