@@ -1,6 +1,6 @@
 # State Vector Sync API Description
 
-This page describes the API of [State Vector Sync (SVS)](README.md). While there are implementations of SVS for multiple programming languages available, the basic API is the same across all official implementations.
+This page describes the API of [State Vector Sync (SVS)](/README.md). While there are implementations of SVS for multiple programming languages available, the basic API is the same across all official implementations.
 
 The three components of an SVS library are:
 
@@ -10,7 +10,7 @@ The three components of an SVS library are:
 
 ## SVSPubSub API
 
-The `SVSPubSub` class provides a high level Pub/Sub interface built over SVS, originally described [here](https://dl.acm.org/doi/abs/10.1145/3460417.3483376).
+The `SVSPubSub` class provides a high level Pub/Sub interface built over SVS, originally described [here](https://doi.org/10.1145/3460417.3483376).
 
 * `SVSPubSub(Name syncPrefix, Name nodePrefix, Face, UpdateCallback, SecurityOptions)` - registers prefixes and starts Sync.
 * `SVSPubSub::publish(Name, Buffer)` - publishes a buffer of data with a given name to the Sync group.
@@ -49,8 +49,8 @@ Derived classes must define:
 
 ## License
 
-State Vector Sync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](LICENSE) for more information.
-
 ![CC-BY-SA](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg)
+
+State Vector Sync is an open source project licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/). See [LICENSE](/LICENSE) for more information.
 
 Different licenses for the implementations might apply.
