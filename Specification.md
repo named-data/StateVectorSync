@@ -1,8 +1,8 @@
 # State Vector Sync Protocol Specification
 
-This page describes the protocol specification of [State Vector Sync](README.md).
+This page describes the protocol specification of [State Vector Sync (SVS)](/README.md).
 
-**Last update to specification**: 2021-12-15
+_Last update to specification: 2021-12-15_
 
 ## 1. Basic Protocol Design
 
@@ -36,7 +36,6 @@ seq=11                                  \
    | ---------------------> |           |
    |                        |           /
    |                        |          /
-
 ```
 
 ## 2. Format and Naming
@@ -71,7 +70,7 @@ SEQ-NO-TYPE = 204
 
 - The encoded state vector in the Interest consists of State Vector Entries
 - Each entry is a tuple of the NodeID of each node followed by its latest sequence number
-- Node names in the encoded version vector are ordered in [NDN canonical order](https://named-data.net/doc/NDN-packet-spec/0.3/name.html#canonical-order) to allow for Interest aggregation.
+- Node names in the encoded version vector are ordered in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) to allow for Interest aggregation.
 - Definition: _A State Vector A is outdated to State Vector B, if A contains any entry with seq number strictly smaller than in B._
 
 ## 4. State Sync
@@ -115,9 +114,9 @@ When a node is in _Supression State_:
 
 - Only aggregate state vector of incoming Sync Interests. No further action in _Suppression State_.
 
-## 5 Examples
+## 5. Examples
 
-### 5.1 State Sync - Example without loss
+### 5.1 State Sync - Example without packet loss
 
 Sync Group with 3 participants, node A, B, and C.
 
@@ -127,7 +126,7 @@ Sync Group with 3 participants, node A, B, and C.
 - B and C receive Sync Interest and update their local states accordingly.
 - _Consistent state is re-established_
 
-### 5.2 State Sync - Example **with** packet loss
+### 5.2 State Sync - Example with packet loss
 
 Sync Group with 3 participants, node A, B, and C.
 
@@ -144,21 +143,21 @@ Sync Group with 3 participants, node A, B, and C.
 - C also receives A’s Sync Interest and updates the state accordingly.
 - _Consistent state is re-established_
 
-## 6 SVS State Machine
+## 6. SVS State Machine
 
-![SVS State Machine](./img/svs-state-machine.jpg)
+![SVS State Machine](img/svs-state-machine.jpg)
 
-## 7 Interest Authentication
+## 7. Interest Authentication
 
-- Sync Interests are signed using the [Signed Interest v0.3](https://named-data.net/doc/NDN-packet-spec/0.3/signed-interest.html) format
+- Sync Interests are signed using the [Signed Interest v0.3](https://docs.named-data.net/NDN-packet-spec/0.3/signed-interest.html) format
 - All nodes must maintain the list of trusted publishers when using asymmetric signatures
   - This mechanism is beyond the scope of the Sync protocol
 - _Note:_ Interest aggregation cannot function when using asymmetric signatures
 
 ## License
 
-State Vector Sync is an open source project licensed under the CC-BY-SA 4.0. See [LICENSE](LICENSE) for more information.
-
 ![CC-BY-SA](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg)
+
+State Vector Sync is an open source project licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/). See [LICENSE](/LICENSE) for more information.
 
 Different licenses for the implementations might apply.

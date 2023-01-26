@@ -1,8 +1,8 @@
 # State Vector Sync Pub/Sub Specification
 
-This page describes the specification of the SVS-PS protocol. SVS-PS runs on top of State Vector Sync and performs the additional functions described here.
+This page describes the specification of the SVS-PS protocol. SVS-PS runs on top of [State Vector Sync](Specification.md) and performs the additional functions described here.
 
-**Last update to specification**: 2022-12-27
+_Last update to specification: 2022-12-27_
 
 ## Overview
 
@@ -125,3 +125,11 @@ Implmentations of SVS-PS SHOULD provide security primitives to applications. If 
 1. Each data packet MUST be validated before being returned to the application. The outer data packet MUST be validated before decapsulation. Only validated segments must be reassembled and returned to the application.
 1. If data validation fails, the application SHOULD be notified of the failure. Implementations SHOULD provide an option to retry fetching segments that could not be validated.
 1. If desegmentation is done asynchronously, the application MUST be notified of the failure to validate a segment if some data has already been returned to the application.
+
+## License
+
+![CC-BY-SA](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg)
+
+State Vector Sync is an open source project licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/). See [LICENSE](/LICENSE) for more information.
+
+Different licenses for the implementations might apply.
