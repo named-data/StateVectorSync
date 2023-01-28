@@ -1,12 +1,14 @@
-plugins:
-  - jekyll-relative-links
-relative_links:
-  enabled: true
-  collections: true
-include:
-  - API.md
-  - README.md
-  - Specification.md
-  - LICENSE
-
-theme: jekyll-theme-slate
+remote_theme: jekyll/minima@32468f51758b0b37c2b1f423265d4f29db461b27
+minima:
+  skin: auto
+  social_links:
+    - platform: github
+      user_url: https://github.com/named-data/StateVectorSync
+    - platform: twitter
+      user_url: https://twitter.com/NamedData
+header_pages:
+  # remove navigation links from the top of the page
+  -
+titles_from_headings:
+  # prevent duplicate page titles
+  strip_title: true
