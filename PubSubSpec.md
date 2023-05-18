@@ -2,7 +2,7 @@
 
 This page describes the specification of the SVS-PS protocol. SVS-PS runs on top of [State Vector Sync](Specification.md) and performs the additional functions described here.
 
-_Last update to specification: 2022-12-27_
+_Last update to specification: 2023-05-19_
 
 ## Overview
 
@@ -82,6 +82,14 @@ SeqNo = SEQ-NO-TYPE TLV-LENGTH NonNegativeInteger
 MAPPING-DATA-TYPE = 205
 MAPPING-ENTRY-TYPE = 206
 SEQ-NO-TYPE = 204
+```
+
+A `MappingEntry` MAY contain additional information such as the time of publication of the data. Any additional information MUST be encoded as one or more TLV blocks following the `ApplicationName` block. SVS-PS implementations SHOULD provide a mechanism to include additional mapping information, and SHOULD allow applications to filter incoming publications based on the received mapping entry. Implementations MAY also provide mechanisms for automatic handling of well-known additional blocks, such as fetching only recent data based on the `Timestamp` block included in the mapping entry.
+
+The following well-known additional blocks are RECOMMENDED.
+
+```abnf
+Timestamp = TimestampNameComponent
 ```
 
 ## Subscribers
