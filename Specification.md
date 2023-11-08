@@ -70,6 +70,7 @@ SEQ-NO-TYPE = 204
 
 - The encoded state vector in the Interest consists of State Vector Entries
 - Each entry is a tuple of the NodeID of each node followed by its latest sequence number
+- The sequence number is 1-indexed, i.e. the first valid sequence number in a state vector is 1
 - Node names in the encoded version vector are ordered in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) to allow for Interest aggregation.
 - Definition: _A State Vector A is outdated to State Vector B, if A contains any entry with seq number strictly smaller than in B._
 
