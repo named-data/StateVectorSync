@@ -2,7 +2,7 @@
 
 This page describes the protocol specification of [State Vector Sync (SVS)](/README.md).
 
-_Last update to specification: 2021-12-15_
+_Last update to specification: 2024-01-09_
 
 ## 1. Basic Protocol Design
 
@@ -40,9 +40,11 @@ seq=11                                  \
 
 ## 2. Format and Naming
 
-**Sync Interest Format**: `/<group-prefix>/<state-vector>/<signature>`
+**Sync Interest Format**: `/<group-prefix>/v=2/<signature>`
 
-A state vector is appended to the name in TLV format:
+The State Vector is encoded in TLV format and included in the Application Parameters of the Sync Interest. The State Vector SHOULD be the first TLV block in the Application Parameters.
+
+Application Paramters: StateVector
 
 Interest Lifetime: 1 second
 
@@ -101,7 +103,9 @@ When a node is in _Steady State_:
 - Incoming Sync Interest is up-to-date or newer.
   - No indication of inconsistencies. The scheduled Sync Interest can be delayed.
   - Eventually update the local state and reset Sync Interest Timer to 30 seconds (±10% uniform)
+  - If the incoming Sync Interest has newer entries, store the current timestamp as the last update time for each updated node.
 - Incoming Sync Interest is outdated: Node moves to _Suppression State_
+  - If every outdated node was updated within the last suppression period, drop the Sync Interest and move to _Steady State_
   - Set Sync Interest Timer to 200ms (±50% uniform) - Time represents the suppression interval
   - Aggregate the state of consequent incoming Sync Interests in a separate state vector
   - On expiration of timer:
