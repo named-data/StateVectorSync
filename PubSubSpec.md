@@ -94,14 +94,9 @@ Timestamp = TimestampNameComponent
 
 ### Name Mapping Delivery Optimization
 
-To optimize the delivery of mapping data, SVS-PS implementations MAY piggyback mapping data in the Sync Interest's Application Parameters. If present, the mapping data SHOULD be appended as a single block after the StateVector in the Application Parameters. The mapping data MUST be encoded as a TLV block of type `MappingData` as defined above.
+To optimize the delivery of mapping data, SVS-PS implementations MAY piggyback mapping data in the Sync Interest's `ApplicationParameters`. If present, the mapping data SHOULD be appended as a single block after the StateVector in the `ApplicationParameters`. The mapping data MUST be encoded as a TLV block of type `MappingData` as defined above.
 
-```
-Sync Interest
-Application Parameters: StateVector MappingData
-```
-
-When this optimization is implemented, Mapping Data SHOULD be inserted in every outgoing Sync Interest sent as a result of new data production at the acting node. On receiving a Sync Interest, this mapping data can be utilized only after the Interest signature has been validated.
+When this optimization is implemented, Mapping Data SHOULD be inserted in every outgoing Sync Interest sent as a result of new data production. On receiving a Sync Interest, this mapping data can be utilized only after the Interest signature has been validated.
 
 ## Subscribers
 
