@@ -98,7 +98,7 @@ SVS utilizes a single Sync Interest timer. It can take on one of the two timeout
 
 - `PeriodicTimeout`: defaults to 30 seconds (±10% uniform)
 - `SuppressionPeriod`: defaults to 200ms
-- `SuppressionTimeout`: random value between 0 to `SuppressionPeriod` \
+- `SuppressionTimeout`: random value between 0 to `SuppressionPeriod`. \
   An exponential decay function SHOULD be used for the timeout value.
   ```
   c = SuppressionPeriod  // constant factor
@@ -125,9 +125,9 @@ SVS utilizes a single Sync Interest timer. It can take on one of the two timeout
   1. Emit a Sync Interest with the current local state vector.
   1. Reset Sync Interest timer to `PeriodicTimeout`.
 
-**Supression State**
+**Suppression State**
 
-- When entering _Supression State_, reset the Sync Interest timer to `SuppressionTimeout`
+- When entering Suppression State_, reset the Sync Interest timer to `SuppressionTimeout`
 - For every incoming Sync Interest, aggregate the state vector into a `MergedStateVector`.
 - On expiration of timer:
   1. If `MergedStateVector` is up-to-date; no inconsistency.
