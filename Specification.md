@@ -1,8 +1,8 @@
 # State Vector Sync Protocol Specification
 
-This page describes the protocol specification of [State Vector Sync (SVS)](/README.md).
+This page describes the protocol specification of [State Vector Sync (SVS)](/README.md) Version 2.
 
-_Last update to specification: 2024-01-09_
+_Last update to specification: 2025-01-04_
 
 ## 1. Basic Protocol Design
 
