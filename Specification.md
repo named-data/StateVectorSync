@@ -1,8 +1,8 @@
 # State Vector Sync Protocol Specification
 
-This page describes the protocol specification of [State Vector Sync (SVS)](/README.md).
+This page describes the protocol specification of [State Vector Sync (SVS)](/README.md) Version 2.
 
-_Last update to specification: 2021-12-15_
+_Last update to specification: 2025-01-04_
 
 ## 1. Basic Protocol Design
 
@@ -40,13 +40,13 @@ seq=11                                  \
 
 ## 2. Format and Naming
 
-**Sync Interest Format**: `/<group-prefix>/<state-vector>/<signature>`
+**Sync Interest Name**: `/<group-prefix>/v=2/<parameters-digest>`
 
-A state vector is appended to the name in TLV format:
+The State Vector is encoded in TLV format and included in the `ApplicationParameters` of the Sync Interest.
+The State Vector SHOULD be the first TLV block in the `ApplicationParameters`.
+The Interest Lifetime for Sync Interests is 1 second.
 
-Interest Lifetime: 1 second
-
-**Data Interest Format**: `/<node-prefix>/<group-prefix>/<seq-num>`
+**Data Interest Name**: `/<node-prefix>/<group-prefix>/<seq-num>`
 
 _Note:_ Choosing alternative Data Interest formats may be decided on application-level.
 
@@ -71,49 +71,80 @@ SEQ-NO-TYPE = 204
 - The encoded state vector in the Interest consists of State Vector Entries
 - Each entry is a tuple of the NodeID of each node followed by its latest sequence number
 - The sequence number is 1-indexed, i.e. the first valid sequence number in a state vector is 1
+- If an entry is not present in the state vector, it is considered as 0 for any calculations.
 - Node names in the encoded version vector are ordered in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) to allow for Interest aggregation.
 - Definition: _A State Vector A is outdated to State Vector B, if A contains any entry with seq number strictly smaller than in B._
 
 ## 4. State Sync
 
-### 4.1 Sync Interests are sent periodically
+### 4.1 Sync Interest Timer
 
-- Maintain a Sync Interest Timer (30 seconds, random ±10%)
-- Decide whether to send a Sync Interest upon timeout
+SVS utilizes a single Sync Interest timer.
+It can take on one of the two timeout values that are used by the protocol.
+The values used by the timer are as follows.
+
+- `PeriodicTimeout`: defaults to 30 seconds (±10% uniform)
+- `SuppressionPeriod`: defaults to 200ms
+- `SuppressionTimeout`: random value between 0 to `SuppressionPeriod`. \
+  An exponential decay function SHOULD be used for the timeout value.
+  ```
+  c = SuppressionPeriod  // constant factor
+  v = random(0, c)       // uniform random value
+  f = 10.0               // decay factor
+  SuppressionTimeout = c * (1 - e^((v - c) / (c / f)))
+  ```
 
 ### 4.2 Send Sync Interests on new publication
 
-- When the node generates a new publication, immediately emit a Sync Interest, reset the Sync Interest Timer.
+- When the node generates a new publication, immediately emit a
+  Sync Interest, and reset the Sync Interest Timer to `PeriodicTimeout`.
 
 ### 4.3 Sync Ack Policy - Do not acknowledge Sync Interests
 
-- Reason: Sending Sync Acks from multiple nodes result in unsolicited data. (the first one is delivered only, others are dropped)
+- Reason: sending Sync Acks from multiple nodes result in unsolicited data.\
+  (only the first one is delivered, others are dropped)
 
-### 4.4 Handling incoming Sync Interests
+### 4.5 Sync Interest Processing and Timer Expiry
 
 Nodes can either be in _Steady State_, or in _Suppression State_
 
-- _Steady State_: The sync group is in sync. Incoming Sync Interests carry the latest known state.
-- _Suppression State_: Incoming Sync Interests indicate a state inconsistency. The node tries reconciling the inconsistency by emitting a up-to-date Sync Interest. Use a suppression timer before sending to prevent flooding.
+- _Steady State_: The Sync group is synchronized.
+  Incoming Sync Interests carry the latest known state.
+- _Suppression State_: Incoming Sync Interests indicate a state inconsistency.
+  The node tries to reconcile the inconsistency by emitting a up-to-date Sync Interest.
+  Use a suppression timer before sending to prevent flooding.
 
-When a node is in _Steady State_:
+**Steady State**
+
+- When entering _Steady State_, reset the Sync Interest timer to `PeriodicTimeout`
 
 - Incoming Sync Interest is up-to-date or newer.
-  - No indication of inconsistencies. The scheduled Sync Interest can be delayed.
-  - Eventually update the local state and reset Sync Interest Timer to 30 seconds (±10% uniform)
-- Incoming Sync Interest is outdated: Node moves to _Suppression State_
-  - Set Sync Interest Timer to 200ms (±50% uniform) - Time represents the suppression interval
-  - Aggregate the state of consequent incoming Sync Interests in a separate state vector
-  - On expiration of timer:
-    - If aggregated received state vector is up-to-date:\
-      No inconsistency - Reset Sync Interest Timer to 30 seconds (±10% uniform)
-    - If aggregated received state vector is outdated:\
-      Inconsistent State: Emit up-to-date Sync Interest. Reset Sync Interest Timer to 30 seconds (±10%)\
-      Node moves to _Steady State_
+  1. If the incoming state vector is newer, update the local state vector. \
+     Store the current timestamp as the last update time for each updated node.
+  1. Reset Sync Interest timer to `PeriodicTimeout`.
 
-When a node is in _Supression State_:
+- Incoming Sync Interest is outdated.
+  1. If every node with an outdated sequence number in the incoming state vector
+    was updated in the last `SuppressionPeriod`, drop the Sync Interest.
+  1. Otherwise, move to _Suppression State_
 
-- Only aggregate state vector of incoming Sync Interests. No further action in _Suppression State_.
+- On expiration of timer:
+  1. Emit a Sync Interest with the current local state vector.
+  1. Reset Sync Interest timer to `PeriodicTimeout`.
+
+**Suppression State**
+
+- When entering Suppression State_, reset the Sync Interest timer to `SuppressionTimeout`
+
+- For every incoming Sync Interest:
+  1. Update the local state vector with any newer sequence numbers.
+  1. Aggregate the state vector into a `MergedStateVector`.
+
+- On expiration of timer:
+  1. If `MergedStateVector` is up-to-date; no inconsistency.
+  1. If `MergedStateVector` is outdated; inconsistent state.\
+     Emit up-to-date Sync Interest.
+  1. Move to _Steady State_.
 
 ## 5. Examples
 
