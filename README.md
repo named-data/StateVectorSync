@@ -6,10 +6,11 @@ Specification and API description of the State Vector Sync (SVS) protocol.
 
 In SVS, the data set state is synchronized using a state vector. Every participant publishes Data under its own producer prefix, and to distinguish subsequent publications, the publications are enumerated using a sequence number. The highest sequence numbers of every participant are exchanged among all communicating participants in a state vector. Whenever receiving a state vector, new publications from other participants can be inferred and retrieved using Interest-Data exchange. The process of data set synchronization is elaborated in more detail in the Protocol Specification below.
 
-Currently, there are three implementations of SVS available:
+Currently, there are several implementations of SVS available:
 
 - **C++**: [named-data/ndn-svs](https://github.com/named-data/ndn-svs)
 - **TypeScript**: [@ndn/svs](https://ndnts-docs.ndn.today/typedoc/modules/_ndn_svs.html)
+- **Golang**: [ndnd/std/sync](https://github.com/named-data/ndnd/blob/main/std/sync)
 - **Python**: [justincpresley/ndn-python-svs](https://github.com/justincpresley/ndn-python-svs)
 
 ## Using State Vector Sync
