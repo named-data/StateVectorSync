@@ -29,7 +29,8 @@ The API is unified across the official libraries. Please find a detailed API des
 
 ## Example Applications
 
-- [SVChat](https://github.com/pulsejet/svchat): An Angular-based chat application featuring the TypeScript version of SVS for group communication.
+- [Workspace](https://github.com/UCLA-IRL/ndn-workspace-solid): A web-based decentralized editor built over NDN.
+- [ndn-dv](https://github.com/named-data/ndnd): A distance vector routing protocol implementation.
 
 ## License
 
