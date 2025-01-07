@@ -47,7 +47,7 @@ The State Vector is encoded in the content of a signed NDN Data packet.
 **Sync Interest Name**: `/<group-prefix>/v=3/<parameters-digest>`
 
 The State Vector Data is included in the `ApplicationParameters` of the Sync Interest.
-The Interest Lifetime for the Sync Interest is 1 second.
+The Interest Lifetime for the Sync Interest SHOULD be set to 1 second.
 
 **Data Interest name**: `/<node-prefix>/<group-prefix>/t=<bootstrap-time>/seq=<seq>`
 
