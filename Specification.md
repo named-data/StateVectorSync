@@ -1,6 +1,6 @@
 # State Vector Sync Protocol Specification
 
-This page describes the protocol specification of [State Vector Sync (SVS)](/README.md) Version 2.
+This page describes the protocol specification of [State Vector Sync (SVS)](/README.md) Version 3.
 
 _Last update to specification: 2025-01-04_
 
@@ -40,40 +40,78 @@ seq=11                                  \
 
 ## 2. Format and Naming
 
-**Sync Interest Name**: `/<group-prefix>/v=2/<parameters-digest>`
+**State Vector Data Name**: `/<group-prefix>/v=3`
 
-The State Vector is encoded in TLV format and included in the `ApplicationParameters` of the Sync Interest.
-The State Vector SHOULD be the first TLV block in the `ApplicationParameters`.
-The Interest Lifetime for Sync Interests is 1 second.
+The State Vector is encoded in the content of a signed NDN Data packet.
 
-**Data Interest Name**: `/<node-prefix>/<group-prefix>/<seq-num>`
+**Sync Interest Name**: `/<group-prefix>/v=3/<parameters-digest>`
+
+The State Vector Data is included in the `ApplicationParameters` of the Sync Interest.
+The Interest Lifetime for the Sync Interest is 1 second.
+
+**Data Interest name**: `/<node-prefix>/<group-prefix>/t=<bootstrap-time>/58=<seq>`
 
 _Note:_ Choosing alternative Data Interest formats may be decided on application-level.
 
-## 3. State Vector TLV Specification
+## 3. State Vector Specification
 
 ```abnf
 StateVector = STATE-VECTOR-TYPE TLV-LENGTH
               *StateVectorEntry
 
 StateVectorEntry = STATE-VECTOR-ENTRY-TYPE TLV-LENGTH
-                   NodeID
-                   SeqNo
+                   Name
+                   *SeqNoEntry
 
-NodeID = Name
+SeqNoEntry = SEQ-NO-ENTRY-TYPE TLV-LENGTH
+             BootstrapTime
+             SeqNo
+
+BootstrapTime = BOOTSTRAP-TIME-TYPE TLV-LENGTH NonNegativeInteger
 SeqNo = SEQ-NO-TYPE TLV-LENGTH NonNegativeInteger
 
 STATE-VECTOR-TYPE = 201
 STATE-VECTOR-ENTRY-TYPE = 202
-SEQ-NO-TYPE = 204
+
+SEQ-NO-ENTRY-TYPE = 210
+BOOTSTRAP-TIME-TYPE = 212
+SEQ-NO-TYPE = 214
 ```
 
-- The encoded state vector in the Interest consists of State Vector Entries
-- Each entry is a tuple of the NodeID of each node followed by its latest sequence number
-- The sequence number is 1-indexed, i.e. the first valid sequence number in a state vector is 1
+- The encoded state vector in the Interest consists of State Vector Entries.
+- Each entry has a node name followed by a list of [bootstrap timetamp, sequence number] tuples.
+- Bootstrap time is specified as seconds since the Unix epoch. Negative values are invalid.
+- The sequence number is 1-indexed, i.e. the first valid sequence number in a state vector is 1.
 - If an entry is not present in the state vector, it is considered as 0 for any calculations.
-- Node names in the encoded version vector are ordered in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) to allow for Interest aggregation.
-- Definition: _A State Vector A is outdated to State Vector B, if A contains any entry with seq number strictly smaller than in B._
+- Entries in the encoded state vector are ordered in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) of name.
+
+### Bootstrap Time
+
+When a node joins the Sync Group, it initializes its local state with an empty state vector
+and sets the local bootstrap time. When the sequence number is incremented, the node adds an entry
+to the state vector with the initial boostrap time and the new sequence number.
+
+The node SHOULD attempt to locally preserve the bootstrap time for as long as possible,
+and reuse it when rejoining the Sync group. If the node loses the bootstrap time, it MUST
+use the current timestamp as the new bootstrap time.
+
+If any received `BootstrapTime` is more than 86400s in the future compared to current time,
+the entire state vector SHOULD be ignored.
+
+### Comparing State Vectors
+
+A State Vector `A` is outdated to `B`, if any of the following conditions are met:
+
+- `A` is missing a name present in `B`.
+- `A` contains an entry with any seq number strictly smaller than `B`.
+
+### Merging State Vectors
+
+The merge of two state vectors `A` and `B` is a new state vector `M` such that:
+
+- `M` contains all names present in `A` or `B`.
+- For each entry in `A` and `B`, `M` contains all `SeqNoEntry` in `A` and `B`.
+- For each `SeqNoEntry` in `C`, the `SeqNo` is the maximum of the `SeqNo` in `A` and `B`.
 
 ## 4. State Sync
 
@@ -138,7 +176,7 @@ Nodes can either be in _Steady State_, or in _Suppression State_
 
 - For every incoming Sync Interest:
   1. Update the local state vector with any newer sequence numbers.
-  1. Aggregate the state vector into a `MergedStateVector`.
+  1. Merge the state vector into a `MergedStateVector`.
 
 - On expiration of timer:
   1. If `MergedStateVector` is up-to-date; no inconsistency.
@@ -148,43 +186,57 @@ Nodes can either be in _Steady State_, or in _Suppression State_
 
 ## 5. Examples
 
+In the following examples, if the timestamp is not explicitly mentioned, it is assumed to be some aribitrary time.
+
 ### 5.1 State Sync - Example without packet loss
 
-Sync Group with 3 participants, node A, B, and C.
+Sync Group with 3 participants, node `A`, `B`, and `C`.
 
-- Data set state: [A=10, B=15, C=25], all nodes are in Sync
-- Node A publishes new publication.
-- A sends Sync Interests with [A=11, B=15, C=25]
-- B and C receive Sync Interest and update their local states accordingly.
+- Data set state: `[A=10, B=15, C=25]`, all nodes are in Sync
+- Node `A` publishes new publication and increments seq number.
+- `A` sends Sync Interests with `[A=11, B=15, C=25]`.
+- `B` and `C` receive Sync Interest and update their local states accordingly.
 - _Consistent state is re-established_
 
 ### 5.2 State Sync - Example with packet loss
 
-Sync Group with 3 participants, node A, B, and C.
+Sync Group with 3 participants, node `A`, `B`, and `C`.
 
-- Data set state: [A=10, B=15, C=25], all nodes are in Sync
-- Node A publishes new publication.
-- A sends Sync Interests with [A=11, B=15, C=25]
-- B receives Sync Interest, but Interest does not reach C
-- **Inconsistent state - C’s state is outdated.**
-- C sends periodic Heartbeat Interest with [**A=10**, B=15, C=25]
-  - A and B receive C’s outdated Sync Interest.
-  - A and B set suppression timer.
-  - A’s timer expires and sends up-to-date Sync Interest.
-- B receives A’s Sync Interest during suppression interval. On suppression timeout, B suppresses the scheduled Sync Interest.
-- C also receives A’s Sync Interest and updates the state accordingly.
+- Data set state: `[A=10, B=15, C=25]`, all nodes are in Sync
+- Node `A` publishes new publication and increments seq number.
+- `A` sends Sync Interests with `[A=11, B=15, C=25]`
+- `B` receives Sync Interest, but Interest does not reach `C`
+- **Inconsistent state - `C`'s state is outdated.**
+- `C` sends periodic Heartbeat Interest with `[*A=10*, B=15, C=25]`
+  - `A` and `B` receive `C`'s outdated Sync Interest.
+  - `A` and `B` set suppression timer.
+  - `A`'s timer expires and sends up-to-date Sync Interest.
+- `B` receives `A`'s Sync Interest during suppression interval. `B` resets timer to periodic timeout.
+- `C` also receives `A`'s Sync Interest and updates the state accordingly.
+- _Consistent state is re-established_
+
+### 5.3 State Sync - Re-Boostrap
+
+Sync Group with 3 participants, node `A`, `B`, and `C`.
+
+State below is represented as `[Name=[BootstrapTime, SeqNo]...]`
+
+- State: `[A=[1636266330,10], B=[1636266412,15], C=[1636266115,25]]`, all nodes are in Sync
+- Node `A` now goes offline and loses all local state information.
+- Node `B` publishes new publication and increments seq number.
+- State: `[A=[1636266330,10], B=[1636266412,16], C=[1636266115,25]]`. **`A` is offline**.
+- Node `A` comes back online and re-joins the Sync Group, using a new bootstrap time.
+- Node `A` publishes new publication and increments seq number.
+- `A` sends its state vector: `[A=[1736266473,1]]`.
+- `B` and `C` receive `A`'s Sync Interest and update their local state. `B` and `C` enter suppression state.
+- `B`'s timer expires and sends up-to-date Sync Interest.\
+  State: `[A=[1636266330,10][1736266473,1], B=[1636266412,16], C=[1636266115,25]]`
+- `A` and `C` receive `B`'s Sync Interest. `A` updates local state. `C` resets timer to periodic timeout.
 - _Consistent state is re-established_
 
 ## 6. SVS State Machine
 
 ![SVS State Machine](img/svs-state-machine.jpg)
-
-## 7. Interest Authentication
-
-- Sync Interests are signed using the [Signed Interest v0.3](https://docs.named-data.net/NDN-packet-spec/0.3/signed-interest.html) format
-- All nodes must maintain the list of trusted publishers when using asymmetric signatures
-  - This mechanism is beyond the scope of the Sync protocol
-- _Note:_ Interest aggregation cannot function when using asymmetric signatures
 
 ## License
 
