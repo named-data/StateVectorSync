@@ -49,7 +49,7 @@ The State Vector is encoded in the content of a signed NDN Data packet.
 The State Vector Data is included in the `ApplicationParameters` of the Sync Interest.
 The Interest Lifetime for the Sync Interest is 1 second.
 
-**Data Interest name**: `/<node-prefix>/<group-prefix>/t=<bootstrap-time>/58=<seq>`
+**Data Interest name**: `/<node-prefix>/<group-prefix>/t=<bootstrap-time>/seq=<seq>`
 
 _Note:_ Choosing alternative Data Interest formats may be decided on application-level.
 
@@ -78,12 +78,12 @@ BOOTSTRAP-TIME-TYPE = 212
 SEQ-NO-TYPE = 214
 ```
 
-- The encoded state vector in the Interest consists of State Vector Entries.
+- The encoded state vector in the Interest consists of a sequence of State Vector Entries, ordered
+  in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) of name.
 - Each entry has a node name followed by a list of [bootstrap timetamp, sequence number] tuples.
 - Bootstrap time is specified as seconds since the Unix epoch. Negative values are invalid.
 - The sequence number is 1-indexed, i.e. the first valid sequence number in a state vector is 1.
 - If an entry is not present in the state vector, it is considered as 0 for any calculations.
-- Entries in the encoded state vector are ordered in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) of name.
 
 ### Bootstrap Time
 
@@ -186,7 +186,7 @@ Nodes can either be in _Steady State_, or in _Suppression State_
 
 ## 5. Examples
 
-In the following examples, if the timestamp is not explicitly mentioned, it is assumed to be some aribitrary time.
+In the following examples, if the timestamp is not explicitly mentioned, it is assumed to be some arbitrary time.
 
 ### 5.1 State Sync - Example without packet loss
 
