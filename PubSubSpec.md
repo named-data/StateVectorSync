@@ -2,7 +2,7 @@
 
 This page describes the specification of the SVS-PS protocol. SVS-PS runs on top of [State Vector Sync](Specification.md) and performs the additional functions described here.
 
-_Last update to specification: 2023-05-19_
+_Last update to specification: 2025-01-04_
 
 ## Overview
 
