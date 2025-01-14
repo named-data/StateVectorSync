@@ -236,7 +236,7 @@ State below is represented as `[Name=[BootstrapTime, SeqNo]...]`
 
 ## 6. SVS State Machine
 
-![SVS State Machine](img/svs-state-machine.jpg)
+![SVS State Machine](img/svs-state-machine.png)
 
 ## License
 
