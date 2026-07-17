@@ -2,7 +2,7 @@
 
 This page describes the protocol specification of [State Vector Sync (SVS)](/README.md) Version 3.
 
-_Last update to specification: 2025-01-14_
+_Last update to specification: 2026-07-17_
 
 ## 1. Basic Protocol Design
 
@@ -49,6 +49,10 @@ The State Vector is encoded in the content of a signed NDN Data packet.
 The State Vector Data is included in the `ApplicationParameters` of the Sync Interest.
 The Interest Lifetime for the Sync Interest SHOULD be set to 1 second.
 
+**Sync Interest Prefix Announcement**: `/<group-prefix>/v=3`
+
+The application SHOULD use this name in the prefix announcement / prefix registration for receiving Sync Interests.
+
 **Data Interest name**: `/<node-prefix>/<group-prefix>/t=<bootstrap-time>/seq=<seq>`
 
 _Note:_ Choosing alternative Data Interest formats may be decided on application-level.
@@ -80,7 +84,7 @@ SEQ-NO-TYPE = 214
 
 - The encoded state vector in the Interest consists of a sequence of State Vector Entries, ordered
   in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) of name.
-- Each entry has a node name followed by a list of [bootstrap timetamp, sequence number] tuples.
+- Each entry has a node name followed by a list of [bootstrap timestamp, sequence number] tuples.
 - Bootstrap time is specified as seconds since the Unix epoch. Negative values are invalid.
 - The sequence number is 1-indexed, i.e. the first valid sequence number in a state vector is 1.
 - If an entry is not present in the state vector, it is considered as 0 for any calculations.
@@ -89,7 +93,7 @@ SEQ-NO-TYPE = 214
 
 When a node joins the Sync Group, it initializes its local state with an empty state vector
 and sets the local bootstrap time. When the sequence number is incremented, the node adds an entry
-to the state vector with the initial boostrap time and the new sequence number.
+to the state vector with the initial bootstrap time and the new sequence number.
 
 The node SHOULD attempt to locally preserve the bootstrap time for as long as possible,
 and reuse it when rejoining the Sync group. If the node loses the bootstrap time, it MUST
@@ -215,7 +219,7 @@ Sync Group with 3 participants, node `A`, `B`, and `C`.
 - `C` also receives `A`'s Sync Interest and updates the state accordingly.
 - _Consistent state is re-established_
 
-### 5.3 State Sync - Re-Boostrap
+### 5.3 State Sync - Re-Bootstrap
 
 Sync Group with 3 participants, node `A`, `B`, and `C`.
 
