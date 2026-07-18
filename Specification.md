@@ -38,7 +38,7 @@ seq=11                                  \
    |                        |          /
 ```
 
-## 2. Format and Naming
+## 2. Naming
 
 **State Vector Data Name**: `/<group-prefix>/v=3`
 
@@ -47,13 +47,13 @@ The State Vector is encoded in the content of a signed NDN Data packet.
 **Sync Interest Name**: `/<group-prefix>/v=3/<parameters-digest>`
 
 The State Vector Data is included in the `ApplicationParameters` of the Sync Interest.
-The Interest Lifetime for the Sync Interest SHOULD be set to 1 second.
+The `InterestLifetime` for the Sync Interest SHOULD be set to 1 second.
 
 **Sync Interest Prefix Announcement**: `/<group-prefix>/v=3`
 
 The application SHOULD use this name in the prefix announcement / prefix registration for receiving Sync Interests.
 
-**Data Interest name**: `/<node-prefix>/<group-prefix>/t=<bootstrap-time>/seq=<seq>`
+**Data Interest Name**: `/<node-prefix>/<group-prefix>/t=<bootstrap-time>/seq=<seq>`
 
 _Note:_ Choosing alternative Data Interest formats may be decided on application-level.
 
@@ -83,7 +83,7 @@ SEQ-NO-TYPE = 214
 ```
 
 - The encoded state vector in the Interest consists of a sequence of State Vector Entries, ordered
-  in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) of name.
+  in [NDN canonical order](https://docs.named-data.net/NDN-packet-spec/0.3/name.html#canonical-order) of Name.
 - Each entry has a node name followed by a list of [bootstrap timestamp, sequence number] tuples.
 - Bootstrap time is specified as seconds since the Unix epoch. Negative values are invalid.
 - The sequence number is 1-indexed, i.e. the first valid sequence number in a state vector is 1.
@@ -99,7 +99,7 @@ The node SHOULD attempt to locally preserve the bootstrap time for as long as po
 and reuse it when rejoining the Sync group. If the node loses the bootstrap time, it MUST
 use the current timestamp as the new bootstrap time.
 
-If any received `BootstrapTime` is more than 86400s in the future compared to current time,
+If any received `BootstrapTime` is more than 24 hours in the future compared to current time,
 the entire state vector SHOULD be ignored.
 
 ### Comparing State Vectors
@@ -138,13 +138,11 @@ The values used by the timer are as follows.
 
 ### 4.2 Send Sync Interests on new publication
 
-- When the node generates a new publication, immediately emit a
-  Sync Interest, and reset the Sync Interest Timer to `PeriodicTimeout`.
+When the node generates a new publication, immediately emit a Sync Interest and reset the Sync Interest Timer to `PeriodicTimeout`.
 
 ### 4.3 Sync Ack Policy - Do not acknowledge Sync Interests
 
-- Reason: sending Sync Acks from multiple nodes result in unsolicited data.\
-  (only the first one is delivered, others are dropped)
+Reason: sending Sync Acks from multiple nodes result in unsolicited Data (only the first one is delivered, others are dropped).
 
 ### 4.5 Sync Interest Processing and Timer Expiry
 
@@ -158,7 +156,7 @@ Nodes can either be in _Steady State_, or in _Suppression State_
 
 **Steady State**
 
-- When entering _Steady State_, reset the Sync Interest timer to `PeriodicTimeout`
+- When entering _Steady State_, reset the Sync Interest timer to `PeriodicTimeout`.
 
 - Incoming Sync Interest is up-to-date or newer.
   1. If the incoming state vector is newer, update the local state vector. \
@@ -166,9 +164,8 @@ Nodes can either be in _Steady State_, or in _Suppression State_
   1. Reset Sync Interest timer to `PeriodicTimeout`.
 
 - Incoming Sync Interest is outdated.
-  1. If every node with an outdated sequence number in the incoming state vector
-    was updated in the last `SuppressionPeriod`, drop the Sync Interest.
-  1. Otherwise, move to _Suppression State_
+  1. If every node with an outdated sequence number in the incoming state vector was updated in the last `SuppressionPeriod`, drop the Sync Interest.
+  1. Otherwise, move to _Suppression State_.
 
 - On expiration of timer:
   1. Emit a Sync Interest with the current local state vector.
@@ -176,7 +173,7 @@ Nodes can either be in _Steady State_, or in _Suppression State_
 
 **Suppression State**
 
-- When entering Suppression State_, reset the Sync Interest timer to `SuppressionTimeout`
+- When entering _Suppression State_, reset the Sync Interest timer to `SuppressionTimeout`.
 
 - For every incoming Sync Interest:
   1. Update the local state vector with any newer sequence numbers.
@@ -200,7 +197,7 @@ Sync Group with 3 participants, node `A`, `B`, and `C`.
 - Node `A` publishes new publication and increments seq number.
 - `A` sends Sync Interests with `[A=11, B=15, C=25]`.
 - `B` and `C` receive Sync Interest and update their local states accordingly.
-- _Consistent state is re-established_
+- _Consistent state is re-established._
 
 ### 5.2 State Sync - Example with packet loss
 
@@ -210,14 +207,14 @@ Sync Group with 3 participants, node `A`, `B`, and `C`.
 - Node `A` publishes new publication and increments seq number.
 - `A` sends Sync Interests with `[A=11, B=15, C=25]`
 - `B` receives Sync Interest, but Interest does not reach `C`
-- **Inconsistent state - `C`'s state is outdated.**
+- _Inconsistent state: `C`'s state is outdated._
 - `C` sends periodic Heartbeat Interest with `[*A=10*, B=15, C=25]`
   - `A` and `B` receive `C`'s outdated Sync Interest.
   - `A` and `B` set suppression timer.
   - `A`'s timer expires and sends up-to-date Sync Interest.
 - `B` receives `A`'s Sync Interest during suppression interval. `B` resets timer to periodic timeout.
 - `C` also receives `A`'s Sync Interest and updates the state accordingly.
-- _Consistent state is re-established_
+- _Consistent state is re-established._
 
 ### 5.3 State Sync - Re-Bootstrap
 
@@ -236,7 +233,7 @@ State below is represented as `[Name=[BootstrapTime, SeqNo]...]`
 - `B`'s timer expires and sends up-to-date Sync Interest.\
   State: `[A=[1636266330,10][1736266473,1], B=[1636266412,16], C=[1636266115,25]]`
 - `A` and `C` receive `B`'s Sync Interest. `A` updates local state. `C` resets timer to periodic timeout.
-- _Consistent state is re-established_
+- _Consistent state is re-established._
 
 ## 6. SVS State Machine
 
