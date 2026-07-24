@@ -1,8 +1,9 @@
 # State Vector Sync Pub/Sub Specification
 
-This page describes the specification of the SVS-PS protocol. SVS-PS runs on top of [State Vector Sync](Specification.md) and performs the additional functions described here.
+This page describes the specification of the SVS-PS protocol Version 3.
+SVS-PS runs on top of [State Vector Sync](Specification.md) and performs the additional functions described here.
 
-_Last update to specification: 2025-01-04_
+_Last update to specification: 2026-07-24_
 
 ## Overview
 
@@ -32,24 +33,24 @@ Each segment MUST be encapsulated inside an "outer" Data packet, named following
 
 ```text
 Segment (encapsulated): /<app-name>/v=0/seg=<seg>
-Segment (outer): /<node-prefix>/<sync-prefix>/<seq-num>/v=0/seg=<seg>
+Segment (outer): /<node-prefix>/<group-prefix>/t=<bootstrap-time>/seq=<seq-num>/v=0/seg=<seg>
 
 Examples:
 Application Data Name: /ndn/data/example
 First Segment (encapsulated): /ndn/data/example/v=0/seg=0
-First Segment (outer): /node/a/some/group/%19/v=0/seg=0
+First Segment (outer): /node/a/some/group/t=1784322744/seq=7/v=0/seg=0
 ```
 
 If no segmentation is done, the Data packet MUST NOT contain a `FinalBlockId` field. The Data packet MUST, likewise, be encapsulated inside an "outer" Data packet. The name of outer Data packet MUST NOT contain version and segment components. The outer Data packet MUST NOT contain a `FinalBlockId` field.
 
 ```text
 Unsegmented (encapsulated): /<app-name>
-Unsegmented (outer): /<node-prefix>/<sync-prefix>/<seq-num>
+Unsegmented (outer): /<node-prefix>/<group-prefix>/t=<bootstrap-time>/seq=<seq-num>
 
 Examples:
 Application Data Name: /ndn/data/example
 Unsegmented (encapsulated): /ndn/data/example
-Unsegmented (outer): /node/a/some/group/%19
+Unsegmented (outer): /node/a/some/group/t=1784322744/seq=7
 ```
 
 On completion of segmentation (or immediately if no segmentation or asynchronous segmentation), the Name Mapping MUST be updated and the SVS sequence number MUST be incremented to the next available sequence number to indicate the data is published.
@@ -61,7 +62,9 @@ The publisher MUST maintain a name mapping table for each NodeID it publishes to
 Each SVS-PS instance MUST respond to Interests for mapping data for each NodeID it publishes at. The name of the `query` Interest is defined as follows:
 
 ```
-/<node-prefix>/<sync-prefix>/MAPPING/<low-seq>/<high-seq>
+/<node-prefix>/<group-prefix>/t=<bootstrap-time>/MAPPING/seq=<low-seq>/seq=<high-seq>
+
+Example: /node/a/some/group/t=1784322744/MAPPING/seq=2/seq=7
 ```
 
 On receiving a matching Interest, the SVS-PS instance MUST respond with a Data packet containing the appropriate subset of the SeqNo-Name tuples for the node matching the `<node-prefix>`, from `low-seq` to `high-seq` both inclusive. The content of the data packet MUST be encoded as a TLV block of type `MappingData` as defined below.
@@ -94,9 +97,9 @@ Timestamp = TimestampNameComponent
 
 ### Name Mapping Delivery Optimization
 
-To optimize the delivery of mapping data, SVS-PS implementations MAY piggyback mapping data in the Sync Interest's `ApplicationParameters`. If present, the mapping data SHOULD be appended as a single block after the StateVector in the `ApplicationParameters`. The mapping data MUST be encoded as a TLV block of type `MappingData` as defined above.
+To optimize the delivery of mapping data, SVS-PS implementations MAY piggyback mapping data in the State Vector Data. If present, the mapping data MUST be appended as a single block after the StateVector in the State Vector Data content. The mapping data MUST be encoded as a TLV block of type `MappingData` as defined above.
 
-When this optimization is implemented, Mapping Data SHOULD be inserted in every outgoing Sync Interest sent as a result of new data production. On receiving a Sync Interest, this mapping data can be utilized only after the Interest signature has been validated.
+When this optimization is implemented, Mapping Data SHOULD be inserted in the State Vector Data enclosed in every outgoing Sync Interest sent as a result of new data production. On receiving a Sync Interest, this mapping data can be utilized only after the State Vector Data signature has been validated.
 
 ## Subscribers
 
@@ -120,7 +123,7 @@ The data segments MUST be fetched if ANY of following are satisfied:
 1. There is at least one entry in the `Subscriptions` table that matches the application data name in the mapping (after the mapping is received).
 1. The producer matches an entry in the `ProducerSubscriptions` table
 
-The data segment is fetched using the name of the outer data packet described in the producers section. All data packets upto the `FinalBlockId` MUST be fetched.
+The data segment is fetched using the name of the outer data packet described in the producers section. All data packets up to the `FinalBlockId` MUST be fetched.
 
 If any requests time out, the implementation MUST provide an option to retry infinitely (with backoff and delay) or a finite number of times. If the number of retries is finite, the implementation SHOULD provide a callback to notify the application of the failure.
 
@@ -130,7 +133,7 @@ Each segment MUST be decapsulated as soon as it is received. The received encaps
 
 ## Security
 
-Implmentations of SVS-PS SHOULD provide security primitives to applications. If the implementation includes security features, it MUST implement the following features.
+Implementations of SVS-PS SHOULD provide security primitives to applications. If the implementation includes security features, it MUST implement the following features.
 
 1. Publishers MUST accept separate data signers for encapsulated and outer data packets.
 1. Publishers MUST accept a separate data signer for the name mapping data packet.
