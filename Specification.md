@@ -2,7 +2,7 @@
 
 This page describes the protocol specification of [State Vector Sync (SVS)](/README.md) Version 3.
 
-_Last update to specification: 2026-07-17_
+_Last update to specification: 2026-10-27
 
 ## 1. Basic Protocol Design
 
@@ -42,7 +42,7 @@ seq=11                                  \
 
 **State Vector Data Name**: `/<group-prefix>/v=3`
 
-The State Vector is encoded in the content of a signed NDN Data packet.
+The State Vector and optional Publication Name are encoded in the content of a signed NDN Data packet.
 
 **Sync Interest Name**: `/<group-prefix>/v=3/<parameters-digest>`
 
@@ -74,8 +74,18 @@ SeqNoEntry = SEQ-NO-ENTRY-TYPE TLV-LENGTH
 BootstrapTime = BOOTSTRAP-TIME-TYPE TLV-LENGTH NonNegativeInteger
 SeqNo = SEQ-NO-TYPE TLV-LENGTH NonNegativeInteger
 
+PublicationName = PUBLICATION-NAME-TYPE TLV-LENGTH
+                  Name
+
+PartialStateVector = PARTIAL-STATE-VECTOR-TYPE TLV-LENGTH
+                     Hash
+                     *StateVectorEntry
+
 STATE-VECTOR-TYPE = 201
 STATE-VECTOR-ENTRY-TYPE = 202
+
+PARTIAL-STATE-VECTOR-TYPE = 203
+PUBLICATION-NAME-TYPE = 204
 
 SEQ-NO-ENTRY-TYPE = 210
 BOOTSTRAP-TIME-TYPE = 212
@@ -117,9 +127,38 @@ The merge of two state vectors `A` and `B` is a new state vector `M` such that:
 - For each entry in `A` and `B`, `M` contains all `SeqNoEntry` in `A` and `B`.
 - For each `SeqNoEntry` in `C`, the `SeqNo` is the maximum of the `SeqNo` in `A` and `B`.
 
-## 4. State Sync
+## 4. Partial State Vectors
 
-### 4.1 Sync Interest Timer
+Partial State Vectors are equivalent to full State Vectors for the following:
+
+### Partial State Vector Entries
+
+- A Partial State Vector SHOULD NOT include every entry in the full State Vector.
+- The sender's own entry MUST be included and others SHOULD be selected based on
+recency of activity of the corresponding participant and randomly.
+
+### Partial State Vector Hash
+
+The Partial State Vector hash is a hash of the entire sequence of State Vector
+entries including those which are not a part of the Partial State Vector.
+
+### Comparing Partial State Vectors
+
+A Partial State Vector `A` is outdated to `B` if `A` contains an entry with any seq number strictly smaller than `B`.
+
+### Full State Vector Data
+
+Applications using Partial State Vectors SHOULD announce prefix `/<group-prefix>/v=3`
+for receiving Interests for full State Vectors.
+
+A full State Vector is fetched when both of the following conditions are met:
+
+- Hash in Partial State Vector `A` does not match hash in Partial State Vector `B`.
+- `A` and `B` are not outdated to each other.
+
+## 5. State Sync
+
+### 5.1 Sync Interest Timer
 
 SVS utilizes a single Sync Interest timer.
 It can take on one of the two timeout values that are used by the protocol.
@@ -136,15 +175,16 @@ The values used by the timer are as follows.
   SuppressionTimeout = c * (1 - e^((v - c) / (c / f)))
   ```
 
-### 4.2 Send Sync Interests on new publication
+### 5.2 Send Sync Interests on new publication
 
 When the node generates a new publication, immediately emit a Sync Interest and reset the Sync Interest Timer to `PeriodicTimeout`.
+The publication name MAY be included in `PublicationName`.
 
-### 4.3 Sync Ack Policy - Do not acknowledge Sync Interests
+### 5.3 Sync Ack Policy - Do not acknowledge Sync Interests
 
 Reason: sending Sync Acks from multiple nodes result in unsolicited Data (only the first one is delivered, others are dropped).
 
-### 4.5 Sync Interest Processing and Timer Expiry
+### 5.5 Sync Interest Processing and Timer Expiry
 
 Nodes can either be in _Steady State_, or in _Suppression State_
 
@@ -185,11 +225,11 @@ Nodes can either be in _Steady State_, or in _Suppression State_
      Emit up-to-date Sync Interest.
   1. Move to _Steady State_.
 
-## 5. Examples
+## 6. Examples
 
 In the following examples, if the timestamp is not explicitly mentioned, it is assumed to be some arbitrary time.
 
-### 5.1 State Sync - Example without packet loss
+### 6.1 State Sync - Example without packet loss
 
 Sync Group with 3 participants, node `A`, `B`, and `C`.
 
@@ -199,7 +239,7 @@ Sync Group with 3 participants, node `A`, `B`, and `C`.
 - `B` and `C` receive Sync Interest and update their local states accordingly.
 - _Consistent state is re-established._
 
-### 5.2 State Sync - Example with packet loss
+### 6.2 State Sync - Example with packet loss
 
 Sync Group with 3 participants, node `A`, `B`, and `C`.
 
@@ -216,7 +256,7 @@ Sync Group with 3 participants, node `A`, `B`, and `C`.
 - `C` also receives `A`'s Sync Interest and updates the state accordingly.
 - _Consistent state is re-established._
 
-### 5.3 State Sync - Re-Bootstrap
+### 6.3 State Sync - Re-Bootstrap
 
 Sync Group with 3 participants, node `A`, `B`, and `C`.
 
@@ -235,7 +275,25 @@ State below is represented as `[Name=[BootstrapTime, SeqNo]...]`
 - `A` and `C` receive `B`'s Sync Interest. `A` updates local state. `C` resets timer to periodic timeout.
 - _Consistent state is re-established._
 
-## 6. SVS State Machine
+### 6.4 State Sync - Example with partial vector and full State Vector Data
+
+Sync Group with 3 participants, node `A`, `B`, and `C`.
+
+- Data set state: `[A=10, B=15, C=25]`, all nodes are in Sync
+- Node `A` publishes new publication and increments seq number.
+- `A` sends Sync Interests with partial vector `[A=11, B=15]`
+- `B` receives Sync Interest, but Interest does not reach `C`
+- _Inconsistent state: `C`'s state is outdated._
+- `C` sends periodic Heartbeat Interest with `[B=15, C=25]`
+  - `A` and `B` receive `C`'s Sync Interest with hash mismatch.
+  - `A` and `B` express Interest for `C`'s full State Vector at `/<group-prefix>/v=3` and find `C` to be outdated
+  - `A` and `B` set suppression timer.
+  - `A`'s timer expires, `A` sends up-to-date Sync Interest with State Vector Data name `/<group-prefix>/v=3` in `PublicationName`
+- `B` receives `A`'s Sync Interest during suppression interval. `B` resets timer to periodic timeout.
+- `C` also receives `A`'s Sync Interest, expresses Interest for `A`'s full State Vector, and updates state accordingly once it is received.
+- _Consistent state is re-established._
+
+## 7. SVS State Machine
 
 ![SVS State Machine](img/svs-state-machine.png)
 
